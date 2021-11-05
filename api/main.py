@@ -4,6 +4,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
+from SPARQLWrapper import SPARQLWrapper, TURTLE, XML, JSON
+
+PREFIXES = """PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX bl: <http://w3id.org/biolink/vocab/>
+PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+PREFIX idot: <http://identifiers.org/idot/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX void: <http://rdfs.org/ns/void#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX void-ext: <http://ldf.fi/void-ext#>"""
+
+METADATA_ENDPOINT = 'https://graphdb.dumontierlab.com/repositories/shapes-registry'
 
 app = FastAPI(
     title='Ranking datasets',
@@ -37,12 +51,71 @@ class RankedDataset(BaseModel):
 
 @app.get("/search", name="Ranked search",
     description="Ranked search of SPARQL endpoints",
+    tags=["Ranked Search"],
     response_model=List[RankedDataset],
 )            
-async def ranked_search(search: str = "novel coronavirus") -> List[RankedDataset]:
+def ranked_search(search: str = "novel coronavirus") -> List[RankedDataset]:
 
     mock_results = [
         {"url": "https://bio2rdf.org/sparql", "score": 42}
     ]
 
     return JSONResponse(mock_results)
+
+
+@app.get("/datasets", name="List datasets available for Ranked Search",
+    description="List the datasets available for Ranked Search",
+    tags=["Ranked Search"],
+    response_model=List[dict],
+)            
+def list_datasets() -> List[dict]:
+
+    list_endpoints_query = PREFIXES + """SELECT DISTINCT ?endpoint (count(distinct ?graph) AS ?datasets_graph_count)
+    WHERE {
+        GRAPH ?endpoint {
+            # ?graph a void:Dataset .
+            ?graph void:propertyPartition ?propertyPartition . 
+            # ?propertyPartition void:property ?predicate ;
+        }
+    } GROUP BY ?endpoint ORDER BY DESC(?datasets_graph_count)
+    """
+
+    sparql = SPARQLWrapper(METADATA_ENDPOINT)
+    sparql.setReturnFormat(JSON)
+    sparql.setQuery(list_endpoints_query)
+    sparqlwrapper_results = sparql.query().convert()
+    sparql_results = sparqlwrapper_results["results"]["bindings"]
+
+    dataset_list = []
+    for result in sparql_results:
+        dataset_list.append({
+            'url': result['endpoint']['value'],
+            'graph_count': result['datasets_graph_count']['value'],
+        })
+
+    return JSONResponse(dataset_list)
+
+
+
+# detailed_metadata_query = PREFIXES + """
+# SELECT DISTINCT ?endpoint ?graph ?subjectCount ?subject ?predicate ?objectCount ?object
+# WHERE {
+# GRAPH ?endpoint {
+#     # ?graph a void:Dataset .
+#     ?graph void:propertyPartition ?propertyPartition . 
+#     ?propertyPartition void:property ?predicate ;
+#     void:classPartition [
+#         void:class ?subject ;
+#         void:distinctSubjects ?subjectCount ;
+#     ] .
+    
+#     OPTIONAL {
+#     ?propertyPartition void-ext:objectClassPartition [
+#     void:class ?object ;
+#     void:distinctObjects ?objectCount ;
+#     ]
+#     }
+# }
+# # FILTER (?sparql_endpoint = ?_sparqlendpoint_iri)
+# } ORDER BY DESC(?subjectCount)
+# """
