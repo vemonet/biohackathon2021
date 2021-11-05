@@ -14,9 +14,9 @@ To address the challenge of enabling more effective ranking, we  propose develop
 
 Expected outcomes: Form an interest group. Develop an initial algorithm. Deploy a prototype.
 
-## Material
+## Scripts
 
-Install dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
