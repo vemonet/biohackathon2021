@@ -7,5 +7,12 @@ COPY ./requirements.txt /app/
 
 RUN pip install -r requirements.txt
 
-COPY ./api /app
-ENV PYTHONPATH=/app
+COPY . /app
+
+RUN python setup.py install
+
+# COPY ./app /app
+# ENV PYTHONPATH=/app
+# ENV PYTHONPATH=/
+
+CMD ["uvicorn", "api.main:app",  "--host", "0.0.0.0", "--port", "80"]

@@ -19,7 +19,7 @@ Expected outcomes: Form an interest group. Develop an initial algorithm. Deploy 
 Install the dependencies:
 
 ```bash
-pip install -r requirements.txt
+python setup.py install
 ```
 
 Example script to get HCLS metadata for the Bio2RDF SPARQL endpoint from the Shapes of You triplestore:
@@ -39,7 +39,7 @@ python3 scripts/construct_metadata.py
 Start the API locally after installing the dependencies:
 
 ```bash
-uvicorn main:app --reload --app-dir api
+uvicorn api.main:app --reload
 ```
 
 Or start it with docker:
@@ -49,3 +49,4 @@ docker-compose up
 ```
 
 Access it on http://localhost:8000/docs
+

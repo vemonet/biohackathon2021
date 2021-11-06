@@ -9,11 +9,7 @@ services:
       - VIRTUAL_HOST=ranking.semanticscience.org
       - LETSENCRYPT_HOST=ranking.semanticscience.org
       - VIRTUAL_PORT=80
-    ports:
-      - 8000:80
-    volumes:
-      - ./api:/app
-    # restart: unless-stopped
+    restart: unless-stopped
     # depends_on:
     #   - virtuoso
 
