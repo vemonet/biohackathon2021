@@ -21,7 +21,10 @@ METADATA_ENDPOINT = 'https://graphdb.dumontierlab.com/repositories/shapes-regist
 
 app = FastAPI(
     title='Ranking datasets',
-    description="""API to rank datasets for the [BioHackathon 2021](https://github.com/elixir-europe/biohackathon-projects-2021/tree/main/projects/26)""",
+    description="""API to rank datasets for the [BioHackathon 2021](https://github.com/elixir-europe/biohackathon-projects-2021/tree/main/projects/26).
+
+[Source code](https://github.com/vemonet/biohackathon2021)    
+""",
     license_info = {
         "name": "MIT license",
         "url": "https://opensource.org/licenses/MIT"
