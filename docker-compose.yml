@@ -6,9 +6,9 @@ services:
     environment:
       - DBA_PASSWORD=${DBA_PASSWORD-dba}
       ## Production deployment with https://github.com/nginx-proxy/nginx-proxy
-      # - VIRTUAL_HOST=ranked-search.137.120.31.148.sslip.io
-      # - LETSENCRYPT_HOST=ranked-search.137.120.31.148.sslip.io
-      # - VIRTUAL_PORT=80
+      - VIRTUAL_HOST=ranking.semanticscience.org
+      - LETSENCRYPT_HOST=ranking.semanticscience.org
+      - VIRTUAL_PORT=80
     ports:
       - 8000:80
     volumes:

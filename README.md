@@ -22,13 +22,13 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-Run script to get HCLS metadata for the Bio2RDF SPARQL endpoint from the Shapes of You triplestore:
+Example script to get HCLS metadata for the Bio2RDF SPARQL endpoint from the Shapes of You triplestore:
 
 ```bash
 python3 scripts/get_metadata.py
 ```
 
-Run script to compute HCLS metadata for the Drugbank graph in the Bio2RDF SPARQL endpoint :
+Example script to compute HCLS metadata for the Drugbank graph in the Bio2RDF SPARQL endpoint :
 
 ```bash
 python3 scripts/construct_metadata.py

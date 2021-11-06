@@ -63,6 +63,7 @@ def ranked_search(search: str = "novel coronavirus") -> List[RankedDataset]:
     return JSONResponse(mock_results)
 
 
+
 @app.get("/datasets", name="List datasets available for Ranked Search",
     description="List the datasets available for Ranked Search",
     tags=["Ranked Search"],
@@ -94,6 +95,71 @@ def list_datasets() -> List[dict]:
         })
 
     return JSONResponse(dataset_list)
+
+
+
+@app.get("/get-dataset-classes", name="Get dataset classes",
+    description="Retrieve the list of classes in a SPARQL endpoint indexed in Shapes of You",
+    tags=["Ranked Search"],
+    response_model=dict,
+)            
+def get_dataset_classes(dataset: str = "https://bio2rdf.org/sparql") -> dict:
+    results = {'classes': [], 'predicates': []}
+    sparql = SPARQLWrapper(METADATA_ENDPOINT)
+    sparql.setReturnFormat(JSON)
+
+    get_properties_query = PREFIXES + """
+    SELECT DISTINCT ?predicate (SUM(?partitionTriples) AS ?triplesCount)
+    WHERE {
+    GRAPH <""" + dataset + """> {
+        ?graph void:propertyPartition ?propertyPartition . 
+        ?propertyPartition void:property ?predicate .
+        ?propertyPartition void:triples ?partitionTriples .
+    } } GROUP BY ?predicate ORDER BY DESC(?triplesCount)"""
+
+    sparql.setQuery(get_properties_query)
+    sparqlwrapper_results = sparql.query().convert()
+    sparql_results = sparqlwrapper_results["results"]["bindings"]
+
+    for result in sparql_results:
+        results['predicates'].append({
+            'uri': result['predicate']['value'],
+            'triples_count': result['triplesCount']['value'],
+        })
+
+
+    get_classes_query = PREFIXES + """
+    SELECT DISTINCT ?class (SUM(?partitionCount) AS ?triplesCount)
+    WHERE {
+    GRAPH <""" + dataset + """> {
+        ?graph void:propertyPartition ?propertyPartition . 
+        ?propertyPartition void:property ?predicate .
+        {
+            ?propertyPartition void:classPartition [
+            void:class ?class ;
+            void:distinctSubjects ?partitionCount ;
+            ] .
+        } UNION {
+            ?propertyPartition void-ext:objectClassPartition [
+                void:class ?class ;
+                void:distinctObjects ?partitionCount ;
+            ] .
+        }
+    }
+    } GROUP BY ?class ORDER BY DESC(?triplesCount)
+    """
+
+    sparql.setQuery(get_classes_query)
+    sparqlwrapper_results = sparql.query().convert()
+    sparql_results = sparqlwrapper_results["results"]["bindings"]
+
+    for result in sparql_results:
+        results['classes'].append({
+            'uri': result['class']['value'],
+            'triples_count': result['triplesCount']['value'],
+        })
+
+    return JSONResponse(results)
 
 
 
