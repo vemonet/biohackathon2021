@@ -93,6 +93,7 @@ def get_dataset_classes(dataset: str = "https://bio2rdf.org/sparql") -> dict:
     get_classes_query = PREFIXES + """
     SELECT DISTINCT ?class (SUM(?partitionCount) AS ?triplesCount)
     WHERE {
+    {
     GRAPH <""" + dataset + """> {
         ?graph void:propertyPartition ?propertyPartition . 
         ?propertyPartition void:property ?predicate .
@@ -107,6 +108,10 @@ def get_dataset_classes(dataset: str = "https://bio2rdf.org/sparql") -> dict:
                 void:distinctObjects ?partitionCount ;
             ] .
         }
+    }
+    } UNION {
+      ?dataset dct:hasPart ?class .
+  	  	FILTER(?dataset = <""" + dataset + """>)
     }
     } GROUP BY ?class ORDER BY DESC(?triplesCount)
     """
@@ -125,25 +130,25 @@ def get_dataset_classes(dataset: str = "https://bio2rdf.org/sparql") -> dict:
 
 
 
-# detailed_metadata_query = PREFIXES + """
-# SELECT DISTINCT ?endpoint ?graph ?subjectCount ?subject ?predicate ?objectCount ?object
-# WHERE {
-# GRAPH ?endpoint {
-#     # ?graph a void:Dataset .
-#     ?graph void:propertyPartition ?propertyPartition . 
-#     ?propertyPartition void:property ?predicate ;
-#     void:classPartition [
-#         void:class ?subject ;
-#         void:distinctSubjects ?subjectCount ;
-#     ] .
+detailed_metadata_query = PREFIXES + """
+SELECT DISTINCT ?endpoint ?graph ?subjectCount ?subject ?predicate ?objectCount ?object
+WHERE {
+GRAPH ?endpoint {
+    # ?graph a void:Dataset .
+    ?graph void:propertyPartition ?propertyPartition . 
+    ?propertyPartition void:property ?predicate ;
+    void:classPartition [
+        void:class ?subject ;
+        void:distinctSubjects ?subjectCount ;
+    ] .
     
-#     OPTIONAL {
-#     ?propertyPartition void-ext:objectClassPartition [
-#     void:class ?object ;
-#     void:distinctObjects ?objectCount ;
-#     ]
-#     }
-# }
-# # FILTER (?sparql_endpoint = ?_sparqlendpoint_iri)
-# } ORDER BY DESC(?subjectCount)
-# """
+    OPTIONAL {
+    ?propertyPartition void-ext:objectClassPartition [
+    void:class ?object ;
+    void:distinctObjects ?objectCount ;
+    ]
+    }
+}
+# FILTER (?sparql_endpoint = ?_sparqlendpoint_iri)
+} ORDER BY DESC(?subjectCount)
+"""

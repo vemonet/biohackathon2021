@@ -15,6 +15,45 @@ services:
 
 
 
+  graphdb:
+    container_name: graphdb
+    image: vemonet/graphdb:9.7.0
+    # image: ontotext/graphdb:9.3.0-ee
+    # build:
+    #   context: ./free-edition
+    #   dockerfile: Dockerfile
+    #   args:
+    #     version: 9.3.0
+    restart: unless-stopped
+    environment: 
+      GDB_JAVA_OPTS: >-
+        -Xmx200g -Xms200g
+        -Dgraphdb.home=/opt/graphdb/home
+        -Dgraphdb.workbench.importDirectory=/opt/graphdb/home/import
+        -Dgraphdb.workbench.cors.enable=true
+        -Denable-context-index=true
+        -Dentity-pool-implementation=transactional
+        -Dgraphdb.append.request.id.headers=true
+        -Dreuse.vars.in.subselects=true
+      # -Dhealth.max.query.time.seconds=60
+      # - GDB_HEAP_SIZE=70G
+      # - GDB_MIN_MEM=100G
+      # - GDB_MAX_MEM=200G
+      # Total: 500G RAM, see http://graphdb.ontotext.com/documentation/standard/requirements.html  
+      VIRTUAL_HOST: graphdb.137.120.31.148.sslip.io
+      LETSENCRYPT_HOST: graphdb.137.120.31.148.sslip.io
+      VIRTUAL_PORT: 7200
+    volumes:
+      - /data/graphdb:/opt/graphdb/home
+      - /data/graphdb/tmp:/tmp
+    # mem_limit: 0
+    # ports: 
+    #   - 7200:7200
+
+
+
+
+
   # virtuoso:
   #   image: openlink/virtuoso-opensource-7:latest
   #   restart: unless-stopped

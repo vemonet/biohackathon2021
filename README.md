@@ -36,6 +36,8 @@ python3 scripts/construct_metadata.py
 
 ## API
 
+Use the public deployment: https://ranking.semanticscience.org/docs
+
 Start the API locally after installing the dependencies:
 
 ```bash
