@@ -8,7 +8,7 @@ from SPARQLWrapper import SPARQLWrapper, TURTLE, XML, JSON
 
 router = APIRouter()
 
-METADATA_ENDPOINT = 'http://lumc-beat-covid.fair-dtls.surf-hosted.nl:7200/repositories/biohackathon-21-project-26'
+METADATA_ENDPOINT = 'https://ejprd.fair-dtls.surf-hosted.nl/triple-store/repositories/bh-2021'
 
 PREFIXES = """PREFIX :<http://www.ontotext.com/graphdb/similarity/>
     PREFIX inst:<http://www.ontotext.com/graphdb/similarity/instance/>
@@ -28,8 +28,7 @@ def ranked_search(search: str = "blood") -> List[dict]:
 
     list_endpoints_query = PREFIXES + """#SELECT DISTINCT ?resource ?label (AVG(?score) AS ?total_score) {
     SELECT DISTINCT ?resource ?label (SUM(?score) AS ?total_score) {
-        VALUES ?search_term {"blood"}
-    #    VALUES ?search_term {"Marfan"}
+        VALUES ?search_term {'""" + search + """'}
         
         # Search similarity index for input text
         ?search a inst:first-index ;
@@ -46,12 +45,9 @@ def ranked_search(search: str = "blood") -> List[dict]:
             ?resource a ?resource_type;
             rdfs:label|dcterms:title ?label;
             dcat:theme ?documentID .
-            #            OPTIONAL {?resource dcterms:description ?resource_description}   
-            #
-            #            FILTER (?resource_type != dcat:Resource)
-        #FILTER(regex(?resource_name, ?search_term) || regex(?resource_description, ?search_term))    
+            # OPTIONAL {?resource dcterms:description ?resource_description}   
+            #FILTER(regex(?resource_name, ?search_term) || regex(?resource_description, ?search_term))    
         }
-    #    FILTER NOT EXISTS (?label)
     } 
     GROUP BY ?resource ?label ORDER BY DESC(?total_score)"""
 
